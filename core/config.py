@@ -1,4 +1,5 @@
 from __future__ import annotations
+from typing import ClassVar
 from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -13,11 +14,24 @@ class EnvBaseSettings(BaseSettings):
 class BotSettings(EnvBaseSettings):
     TOKEN: str
     OWNER: int
-    RATE_LIMIT: int | float = 0.5  # for throttling control
+    RATE_LIMIT: int | float = 0.5
 
-class Settings(BotSettings):
+class DBSettings(EnvBaseSettings):
+    DB_UPDATE_INTERVAL: int = 60 #seconds
+    DBConnect: str
+    DBBase: str
+    DBUsers: str
+    DBBlock: str
+
+class CacheSettings(EnvBaseSettings):
+    MAX_WHITELIST_SIZE: int = 10000 # Максимальный размер белого списка
+    CACHE_LIFETIME: int = 3600 # Время жизни кэша блокировок (в секундах)
+
+class Settings(BotSettings, DBSettings, CacheSettings):
+    bot: ClassVar[type[BotSettings]] = BotSettings
+    db: ClassVar[type[BotSettings]] = DBSettings
+
     DEBUG: bool = False
-
 
 def get_settings() -> Settings:
     return Settings()
